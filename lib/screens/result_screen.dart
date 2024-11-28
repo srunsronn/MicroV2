@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:microquiz2/model/quiz.dart'; // Ensure this contains your `Question` model.
+import 'package:microquiz2/model/quiz.dart';
+import 'package:microquiz2/model/submission.dart';
 import 'package:microquiz2/widgets/app_button.dart';
 
 class ResultScreen extends StatelessWidget {
-  final int score;
-  final int total;
-  final VoidCallback onRestart;
-  final List<Question> questions;
-  final Map<Question, String> userAnswers; // Map of user-selected answers.
-
   const ResultScreen({
     super.key,
-    required this.score,
-    required this.total,
     required this.onRestart,
-    required this.questions,
-    required this.userAnswers,
+    required this.quiz,
+    required this.submission,
   });
+
+  final VoidCallback onRestart;
+  final Quiz quiz;
+  final Submission submission;
 
   @override
   Widget build(BuildContext context) {
@@ -26,93 +23,55 @@ class ResultScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Display the score
               Text(
-                "You answered $score on $total !",
-                textAlign: TextAlign.center,
+                'You scored ${submission.getScore()} out of ${quiz.questions.length}!',
                 style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 30,
                   color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
-              for (var i = 0; i < questions.length; i++)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.center, // Center all children
+              ...quiz.questions.map((item) => Column(
                     children: [
-                      // Align the CircleAvatar and Question Text together
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.center, // Center the Row
-                        children: [
-                          // Question index with CircleAvatar
-                          CircleAvatar(
-                            backgroundColor: userAnswers[questions[i]] ==
-                                    questions[i].goodAnswer
-                                ? Colors.green
-                                : Colors.red,
-                            radius: 20,
-                            child: Text(
-                              '${i + 1}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          // Question title (Text)
-                          Flexible(
-                            // Use Flexible to allow dynamic sizing
-                            child: Text(
-                              questions[i].title,
-                              textAlign:
-                                  TextAlign.center, // Center the question title
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontSize: 25,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 10),
-                      // Display possible answers with proper formatting
-                      Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.center, // Center align answers
-                        children: questions[i].possibleAnswers.map((option) {
-                          final isCorrect = option == questions[i].goodAnswer;
-                          final isUserAnswer =
-                              option == userAnswers[questions[i]];
+                      ...item.possibleAnswers.map((answer) {
+                        final isCorrect = answer == item.goodAnswer;
+                        final userAnswer =
+                            submission.getAnswerFor(item)?.selectAnswer;
+                        final isUserAnswer = userAnswer == answer;
 
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .center, // Center the answer options
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                isUserAnswer
-                                    ? (isCorrect
-                                        ? Icons.check_circle
-                                        : Icons.cancel)
-                                    : (isCorrect
-                                        ? Icons.check_circle_outline
-                                        : null),
+                                isCorrect
+                                    ? Icons.check_circle
+                                    : (isUserAnswer
+                                        ? Icons.cancel
+                                        : Icons.circle_outlined),
                                 color: isCorrect
                                     ? Colors.green
                                     : (isUserAnswer ? Colors.red : Colors.grey),
-                                size: 18,
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 8),
                               Text(
-                                option,
+                                answer,
                                 style: TextStyle(
+                                  fontSize: 20,
                                   color: isCorrect
                                       ? Colors.green
                                       : (isUserAnswer
@@ -124,18 +83,18 @@ class ResultScreen extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          );
-                        }).toList(),
-                      ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 20),
                     ],
-                  ),
-                ),
-              const SizedBox(height: 20),
-              // Restart Button
+                  )),
+              const SizedBox(height: 30),
+              // Restart button
               AppButton(
                 "Restart Quiz",
                 onTap: onRestart,
-                icon: Icons.restart_alt_sharp,
+                icon: Icons.restart_alt_rounded,
               ),
             ],
           ),

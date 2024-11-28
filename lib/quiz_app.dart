@@ -65,7 +65,10 @@ class _QuizAppState extends State<QuizApp> {
 
     switch (_quizState) {
       case QuizState.notStarted:
-        screen = WelcomeScreen(onStart: _startQuiz, title: quiz.title);
+        screen = WelcomeScreen(
+          onStart: _startQuiz,
+          title: quiz.title,
+        );
         break;
       case QuizState.started:
         screen = QuestionScreen(
@@ -75,11 +78,9 @@ class _QuizAppState extends State<QuizApp> {
         break;
       case QuizState.finished:
         screen = ResultScreen(
-          score: _submission.getScore(),
-          total: quiz.questions.length,
           onRestart: _restartQuiz,
-          questions: quiz.questions,
-          userAnswers: _submission.getUserAnswers(),
+          quiz: quiz,
+          submission: _submission,
         );
         break;
     }
