@@ -46,9 +46,7 @@ class Submission {
     }
     return null;
   }
-  Map<Question, String> getUserAnswers() {
-  return {for (var answer in answers) answer.question: answer.selectAnswer};
-}
+
 
   // remove Answer
   void removeAnswers() {

@@ -18,7 +18,7 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.blue, 
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -35,62 +35,92 @@ class ResultScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
-              ...quiz.questions.map((item) => Column(
-                    children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontSize: 25,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ...item.possibleAnswers.map((answer) {
-                        final isCorrect = answer == item.goodAnswer;
-                        final userAnswer =
-                            submission.getAnswerFor(item)?.selectAnswer;
-                        final isUserAnswer = userAnswer == answer;
+              ...quiz.questions.asMap().entries.map((entry) {
+                int index = entry.key;
+                Question question = entry.value;
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                isCorrect
-                                    ? Icons.check_circle
-                                    : (isUserAnswer
-                                        ? Icons.cancel
-                                        : Icons.circle_outlined),
-                                color: isCorrect
-                                    ? Colors.green
-                                    : (isUserAnswer ? Colors.red : Colors.grey),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                answer,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: isCorrect
-                                      ? Colors.green
-                                      : (isUserAnswer
-                                          ? Colors.red
-                                          : Colors.black),
-                                  fontWeight: isCorrect || isUserAnswer
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ],
+                final userAnswer =
+                    submission.getAnswerFor(question)?.selectAnswer;
+                final isCorrect =
+                    userAnswer != null && userAnswer == question.goodAnswer;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: isCorrect
+                              ? Colors.green 
+                              : Colors.red, 
+                          child: Text(
+                            '${index + 1}', 
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        );
-                      }),
-                      const SizedBox(height: 20),
-                    ],
-                  )),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            question.title,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Display the answers for the question
+                    ...question.possibleAnswers.map((answer) {
+                      final isCorrectAnswer = answer == question.goodAnswer;
+                      final isUserAnswer = userAnswer == answer;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 40), 
+                            Icon(
+                              isCorrectAnswer
+                                  ? Icons.check_circle 
+                                  : (isUserAnswer
+                                      ? Icons.cancel 
+                                      : Icons.circle_outlined),
+                              color: isCorrectAnswer
+                                  ? Colors.green
+                                  : (isUserAnswer ? Colors.red : Colors.grey),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              answer,
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: isCorrectAnswer
+                                    ? Colors.green
+                                    : (isUserAnswer
+                                        ? Colors.red
+                                        : Colors.black),
+                                fontWeight: isCorrectAnswer || isUserAnswer
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                  ],
+                );
+              }),
               const SizedBox(height: 30),
-              // Restart button
               AppButton(
                 "Restart Quiz",
                 onTap: onRestart,
